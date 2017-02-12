@@ -30,12 +30,12 @@ import Data.Text (Text)
 
 data AddRequest =
   AddRequest
-    { adrConsumerKey :: Text
-    , adrAccessToken :: Text
-    , adrUrl :: Text
-    , adrTitle :: Maybe Text
-    , adrTags :: Maybe Text
-    , adrTweetId :: Maybe Text
+    { addReqConsumerKey :: Text
+    , addReqAccessToken :: Text
+    , addReqUrl :: Text
+    , addReqTitle :: Maybe Text
+    , addReqTags :: Maybe Text
+    , addReqTweetId :: Maybe Text
     }
 
 
@@ -48,11 +48,11 @@ makeAddRequest
   -> Text
   -> Text
   -> AddRequest
-makeAddRequest adrConsumerKey adrAccessToken adrUrl =
+makeAddRequest addReqConsumerKey addReqAccessToken addReqUrl =
   AddRequest
-    { adrTitle = Nothing
-    , adrTags = Nothing
-    , adrTweetId = Nothing
+    { addReqTitle = Nothing
+    , addReqTags = Nothing
+    , addReqTweetId = Nothing
     , ..
     }
 
@@ -64,9 +64,9 @@ makeAddRequest adrConsumerKey adrAccessToken adrUrl =
 instance ToJSON AddRequest where
   toJSON AddRequest {..} =
     object
-      [ "url" .= adrUrl
-      , "consumer_key" .= adrConsumerKey
-      , "access_token" .= adrAccessToken
+      [ "url" .= addReqUrl
+      , "consumer_key" .= addReqConsumerKey
+      , "access_token" .= addReqAccessToken
       ]
 
 
@@ -76,8 +76,8 @@ instance ToJSON AddRequest where
 
 data AddResponse =
   AddResponse
-    { addResponseItem :: Object
-    , addResponseStatus :: Integer
+    { addRespItem :: Object
+    , addRespStatus :: Integer
     }
 
 
@@ -89,6 +89,6 @@ instance FromJSON AddResponse where
   parseJSON =
     withObject "" $
       \o -> do
-        addResponseItem <- o .: "item"
-        addResponseStatus <- o .: "status"
+        addRespItem <- o .: "item"
+        addRespStatus <- o .: "status"
         return AddResponse {..}

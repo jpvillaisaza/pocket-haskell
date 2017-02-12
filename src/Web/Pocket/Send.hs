@@ -30,9 +30,9 @@ import Data.Text (Text)
 
 data SendRequest =
   SendRequest
-    { srConsumerKey :: Text
-    , srAccessToken :: Text
-    , srActions :: [Action]
+    { sendReqConsumerKey :: Text
+    , sendReqAccessToken :: Text
+    , sendReqActions :: [Action]
     }
 
 
@@ -43,9 +43,9 @@ data SendRequest =
 instance ToJSON SendRequest where
   toJSON SendRequest {..} =
     object
-      [ "consumer_key" .= srConsumerKey
-      , "access_token" .= srAccessToken
-      , "actions" .= srActions
+      [ "consumer_key" .= sendReqConsumerKey
+      , "access_token" .= sendReqAccessToken
+      , "actions" .= sendReqActions
       ]
 
 
@@ -194,8 +194,8 @@ instance ToJSON Action where
 
 data SendResponse =
   SendResponse
-    { actionResults :: [Bool]
-    , status :: Integer
+    { sendRespActionResults :: [Bool]
+    , sendRespStatus :: Integer
     }
   deriving (Show)
 
@@ -208,6 +208,6 @@ instance FromJSON SendResponse where
   parseJSON =
     withObject "" $
       \o -> do
-        actionResults <- o .: "action_results"
-        status <- o .: "status"
+        sendRespActionResults <- o .: "action_results"
+        sendRespStatus <- o .: "status"
         return SendResponse {..}

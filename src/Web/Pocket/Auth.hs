@@ -33,9 +33,9 @@ import Data.Text (Text)
 
 data AuthRequest =
   AuthRequest
-    { arConsumerKey :: Text
-    , arRedirectUri :: Text
-    , arState :: Maybe Text
+    { authReqConsumerKey :: Text
+    , authReqRedirectUri :: Text
+    , authReqState :: Maybe Text
     }
 
 
@@ -46,9 +46,9 @@ data AuthRequest =
 instance ToJSON AuthRequest where
   toJSON AuthRequest {..} =
     object
-      [ "consumer_key" .= arConsumerKey
-      , "redirect_uri" .= arRedirectUri
-      , "state" .= arState
+      [ "consumer_key" .= authReqConsumerKey
+      , "redirect_uri" .= authReqRedirectUri
+      , "state" .= authReqState
       ]
 
 
@@ -60,8 +60,8 @@ makeAuthRequest
   :: Text
   -> Text
   -> AuthRequest
-makeAuthRequest arConsumerKey arRedirectUri =
-  AuthRequest { arState = Nothing, .. }
+makeAuthRequest authReqConsumerKey authReqRedirectUri =
+  AuthRequest { authReqState = Nothing, .. }
 
 
 -- |
@@ -70,8 +70,8 @@ makeAuthRequest arConsumerKey arRedirectUri =
 
 data AuthResponse =
   AuthResponse
-    { code :: Text
-    , state :: Maybe Text
+    { authRespCode :: Text
+    , authRespState :: Maybe Text
     }
   deriving (Show)
 
@@ -84,8 +84,8 @@ instance FromJSON AuthResponse where
   parseJSON =
     withObject "" $
       \o -> do
-        code <- o .: "code"
-        state <- o .: "state"
+        authRespCode <- o .: "code"
+        authRespState <- o .: "state"
         return AuthResponse {..}
 
 
@@ -95,8 +95,8 @@ instance FromJSON AuthResponse where
 
 data AuthorizeRequest =
   AuthorizeRequest
-    { arrConsumerKey :: Text
-    , arrCode :: Text
+    { authorizeReqConsumerKey :: Text
+    , authorizeReqCode :: Text
     }
 
 
@@ -107,8 +107,8 @@ data AuthorizeRequest =
 instance ToJSON AuthorizeRequest where
   toJSON AuthorizeRequest {..} =
     object
-      [ "consumer_key" .= arrConsumerKey
-      , "code" .= arrCode
+      [ "consumer_key" .= authorizeReqConsumerKey
+      , "code" .= authorizeReqCode
       ]
 
 
@@ -120,7 +120,7 @@ makeAuthorizeRequest
   :: Text
   -> Text
   -> AuthorizeRequest
-makeAuthorizeRequest arrConsumerKey arrCode =
+makeAuthorizeRequest authorizeReqConsumerKey authorizeReqCode =
   AuthorizeRequest {..}
 
 
@@ -130,9 +130,9 @@ makeAuthorizeRequest arrConsumerKey arrCode =
 
 data AuthorizeResponse =
   AuthorizeResponse
-    { arespAccessToken :: Text
-    , arespUsername :: Text
-    , arespState :: Maybe Text
+    { authorizeRespAccessToken :: Text
+    , authorizeRespUsername :: Text
+    , authorizeRespState :: Maybe Text
     }
 
 
@@ -144,7 +144,7 @@ instance FromJSON AuthorizeResponse where
   parseJSON =
     withObject "" $
       \o -> do
-        arespAccessToken <- o .: "access_token"
-        arespUsername <- o .: "username"
-        arespState <- o .: "state"
+        authorizeRespAccessToken <- o .: "access_token"
+        authorizeRespUsername <- o .: "username"
+        authorizeRespState <- o .: "state"
         return AuthorizeResponse {..}

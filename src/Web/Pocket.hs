@@ -170,7 +170,7 @@ makeManager =
   let
     managerSettings =
       tlsManagerSettings
-        { managerModifyRequest = \r -> do
+        { managerModifyRequest = \r ->
             return
               r
                 { requestHeaders =

@@ -82,7 +82,7 @@ data AuthResponse =
 
 instance FromJSON AuthResponse where
   parseJSON =
-    withObject "" $ do
+    withObject "" $
       \o -> do
         code <- o .: "code"
         state <- o .: "state"

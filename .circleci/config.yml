@@ -1,0 +1,22 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: fpco/stack-build:lts-9.21
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-.stack-{{ checksum "stack.yaml" }}-{{ checksum "pocket.cabal" }}
+            - v1-.stack-{{ checksum "stack.yaml" }}
+            - v1-.stack-
+      - run:
+          name: Build dependencies
+          command: stack build --only-dependencies
+      - save_cache:
+          key: v1-.stack-{{ checksum "stack.yaml" }}-{{ checksum "pocket.cabal" }}
+          paths:
+            - ~/.stack/
+      - run:
+          name: Build package
+          command: stack build

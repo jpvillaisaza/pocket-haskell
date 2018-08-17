@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: fpco/stack-build:lts-8.0
+      - image: fpco/stack-build:lts-9.21
     steps:
       - checkout
       - restore_cache:

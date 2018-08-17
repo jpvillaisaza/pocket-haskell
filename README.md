@@ -3,4 +3,4 @@
 [![][1]][0]
 
 [0]: https://circleci.com/gh/jpvillaisaza/pocket-haskell
-[1]: https://circleci.com/gh/jpvillaisaza/pocket-haskell.svg?style=svg
+[1]: https://circleci.com/gh/jpvillaisaza/pocket-haskell.svg?style=shield

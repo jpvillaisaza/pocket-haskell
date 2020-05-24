@@ -1,6 +1,4 @@
-{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeOperators #-}
 
 ----------------------------------------------------------------------
 -- |
@@ -12,37 +10,16 @@
 ----------------------------------------------------------------------
 
 module Web.Pocket
-  ( AuthRequest (..)
-  , makeAuthRequest
-  , AuthorizeRequest (..)
-  , makeAuthorizeRequest
-  , authRequest
-  , authorize
-  , add
-  , AddRequest (..)
-  , makeAddRequest
-  , AddResponse (..)
-  , send
-  , Action (..)
-  , SendRequest (..)
-  , SendResponse (..)
-  , get
-  , GetRequest (..)
-  , makeGetRequest
-  , GetResponse (..)
-  , run
-  , makeManager
-  )
   where
 
+-- aeson
+import qualified Data.Aeson as Aeson
+
 -- base
-import Data.Proxy (Proxy (..))
+import Control.Monad.IO.Class (MonadIO)
 
--- http-client
-import Network.HTTP.Client hiding (Proxy)
-
--- http-client-tls
-import Network.HTTP.Client.TLS
+-- http-conduit
+import Network.HTTP.Simple
 
 -- pocket
 import Web.Pocket.Add
@@ -50,134 +27,74 @@ import Web.Pocket.Auth
 import Web.Pocket.Get
 import Web.Pocket.Send
 
--- servant
-import Servant.API
-
--- servant-client
-import Servant.Client hiding (Client)
-
--- transformers
-import Control.Monad.IO.Class
+-- text
+import qualified Data.Text as Text
 
 
--- |
---
---
-
-type API =
-  "v3"
-    :>
-      ( "oauth"
-          :>
-            ( "request"
-                :> ReqBody '[JSON] AuthRequest
-                :> Post '[JSON] AuthResponse
-            :<|>
-              "authorize"
-                :> ReqBody '[JSON] AuthorizeRequest
-                :> Post '[JSON] AuthorizeResponse
-            )
-      :<|>
-        "add"
-          :> ReqBody '[JSON] AddRequest
-          :> Post '[JSON] AddResponse
-      :<|>
-        "send"
-          :> ReqBody '[JSON] SendRequest
-          :> Post '[JSON] SendResponse
-      :<|>
-        "get"
-          :> ReqBody '[JSON] GetRequest
-          :> Post '[JSON] GetResponse
-      )
-
-
--- |
---
---
-
-authRequest
-  :: AuthRequest
-  -> ClientM AuthResponse
-
-
--- |
---
---
-
-authorize
-  :: AuthorizeRequest
-  -> ClientM AuthorizeResponse
-
-
--- |
---
---
-
-add
-  :: AddRequest
-  -> ClientM AddResponse
-
-
--- |
---
---
-
-send
-  :: SendRequest
-  -> ClientM SendResponse
-
-
--- |
---
---
-
-get
-  :: GetRequest
-  -> ClientM GetResponse
-
-(authRequest :<|> authorize) :<|> add :<|> send :<|> get =
-  client (Proxy :: Proxy API)
-
-
--- |
---
---
-
-run
-  :: MonadIO m
-  => Manager
-  -> ClientM a
-  -> m (Either ServantError a)
-run manager =
+authReq :: AuthRequest -> IO AuthResponse
+authReq ar = do
+  request' <- parseRequest "POST https://getpocket.com/v3/oauth/request"
   let
-    baseUrl =
-      BaseUrl
-        Https
-        "getpocket.com"
-        443
-        ""
-  in
-    liftIO . flip runClientM (ClientEnv manager baseUrl)
+    request =
+      setRequestBodyJSON ar
+        $ setRequestHeaders [ ("Content-Type", "application/json")
+        , ("X-Accept", "application/json")
+        ]
+        $ request'
+  response <- httpLBS request
+  case Aeson.decode (getResponseBody response) of
+    Just authResponse -> pure authResponse
+    Nothing -> undefined
 
+authGet :: AuthRequest -> IO String
+authGet ar = do
+  authRsp <- authReq ar
+  pure $
+    "https://getpocket.com/auth/authorize?request_token="
+      <> Text.unpack (authRespCode authRsp)
+      <> "&redirect_uri="
+      <> Text.unpack (authReqRedirectUri ar)
 
--- |
---
---
-
-makeManager :: IO Manager
-makeManager =
+authorizeReq :: AuthorizeRequest -> IO AuthorizeResponse
+authorizeReq ar = do
+  request' <- parseRequest "POST https://getpocket.com/v3/oauth/authorize"
   let
-    managerSettings =
-      tlsManagerSettings
-        { managerModifyRequest = \r ->
-            return
-              r
-                { requestHeaders =
-                    [ ("Content-Type", "application/json")
-                    , ("X-Accept", "application/json")
-                    ]
-                }
-        }
-  in
-    newManager managerSettings
+    request =
+      setRequestBodyJSON ar
+        $ setRequestHeaders [ ("Content-Type", "application/json")
+        , ("X-Accept", "application/json")
+        ]
+        $ request'
+  response <- httpLBS request
+  print response
+  case Aeson.eitherDecode (getResponseBody response) of
+    Right authResponse -> pure authResponse
+    Left e -> fail e
+
+
+add :: AddRequest -> IO AddResponse
+add addReq = do
+  request' <- parseRequest "POST https://getpocket.com/v3/add"
+  let
+    request =
+      setRequestBodyJSON addReq
+        $ setRequestHeaders [ ("Content-Type", "application/json")
+        , ("X-Accept", "application/json")
+        ]
+        $ request'
+  response <- httpLBS request
+  case Aeson.decode (getResponseBody response) of
+    Just authResponse -> pure authResponse
+    Nothing -> do
+      let headers = getResponseHeader "X-Error" response
+      undefined
+
+send :: MonadIO m => SendRequest -> m SendResponse
+send =
+  -- "POST https://getpocket.com/v3/send"
+  undefined
+
+get :: MonadIO m => GetRequest -> m GetResponse
+get =
+  -- "POST https://getpocket.com/v3/GET"
+  undefined

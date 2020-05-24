@@ -12,6 +12,8 @@ github: jpvillaisaza/pocket-haskell
 
 library:
   source-dirs: src
+  other-modules:
+    - Web.Pocket.Internal
   dependencies:
     - aeson
     - base

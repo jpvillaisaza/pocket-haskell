@@ -19,23 +19,17 @@ module Web.Pocket
   )
   where
 
--- aeson
-import Data.Aeson (FromJSON, ToJSON)
-import qualified Data.Aeson as Aeson
-
 -- base
 import Control.Monad.IO.Class (MonadIO)
 
 -- exceptions
 import Control.Monad.Catch (MonadThrow)
 
--- http-conduit
-import Network.HTTP.Simple
-
 -- pocket
 import Web.Pocket.Add
 import Web.Pocket.Auth
 import Web.Pocket.Get
+import Web.Pocket.Internal
 import Web.Pocket.Send
 
 -- text
@@ -71,20 +65,3 @@ get =
 send :: (MonadIO m, MonadThrow m) => SendRequest -> m SendResponse
 send =
   common "POST https://getpocket.com/v3/send"
-
-common :: (ToJSON a, FromJSON b, MonadIO m, MonadThrow m) => String -> a -> m b
-common req r = do
-  request' <- parseRequest req
-  let
-    request =
-      setRequestBodyJSON r
-        $ setRequestHeaders [ ("Content-Type", "application/json")
-        , ("X-Accept", "application/json")
-        ]
-        $ request'
-  response <- httpLBS request
-  case Aeson.decode (getResponseBody response) of
-    Just authResponse -> pure authResponse
-    Nothing -> do
-      let headers = getResponseHeader "X-Error" response
-      undefined

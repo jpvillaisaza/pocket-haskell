@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e4e8ea3d9e108b81f2b9446629f5258bd6f67457ef5a7aead9da87c66ef696bb
+-- hash: 8f94031d2b6a3281c6b26735fa87e455465527952d203e4d7bfa1488dd766f77
 
 name:           pocket
 version:        0.2.0
@@ -29,7 +29,7 @@ library
       Web.Pocket.Get
       Web.Pocket.Send
   other-modules:
-      Paths_pocket
+      Web.Pocket.Internal
   hs-source-dirs:
       src
   ghc-options: -Wall

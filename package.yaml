@@ -1,0 +1,22 @@
+name: pocket
+version: 0.2.0
+
+synopsis: Bindings for the Pocket API
+description: Haskell bindings for the Pocket API.
+
+category: Web
+
+author: Juan Pedro Villa Isaza
+
+github: jpvillaisaza/pocket-haskell
+
+library:
+  source-dirs: src
+  dependencies:
+    - aeson
+    - base
+    - exceptions
+    - http-conduit
+    - text
+  ghc-options:
+    - -Wall

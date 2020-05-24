@@ -10,13 +10,24 @@
 ----------------------------------------------------------------------
 
 module Web.Pocket
+  ( authReq
+  , authGet
+  , authorizeReq
+  , add
+  , get
+  , send
+  )
   where
 
 -- aeson
+import Data.Aeson (FromJSON, ToJSON)
 import qualified Data.Aeson as Aeson
 
 -- base
 import Control.Monad.IO.Class (MonadIO)
+
+-- exceptions
+import Control.Monad.Catch (MonadThrow)
 
 -- http-conduit
 import Network.HTTP.Simple
@@ -31,20 +42,9 @@ import Web.Pocket.Send
 import qualified Data.Text as Text
 
 
-authReq :: AuthRequest -> IO AuthResponse
-authReq ar = do
-  request' <- parseRequest "POST https://getpocket.com/v3/oauth/request"
-  let
-    request =
-      setRequestBodyJSON ar
-        $ setRequestHeaders [ ("Content-Type", "application/json")
-        , ("X-Accept", "application/json")
-        ]
-        $ request'
-  response <- httpLBS request
-  case Aeson.decode (getResponseBody response) of
-    Just authResponse -> pure authResponse
-    Nothing -> undefined
+authReq :: (MonadIO m, MonadThrow m) => AuthRequest -> m AuthResponse
+authReq =
+  common "POST https://getpocket.com/v3/oauth/request"
 
 authGet :: AuthRequest -> IO String
 authGet ar = do
@@ -55,29 +55,29 @@ authGet ar = do
       <> "&redirect_uri="
       <> Text.unpack (authReqRedirectUri ar)
 
-authorizeReq :: AuthorizeRequest -> IO AuthorizeResponse
-authorizeReq ar = do
-  request' <- parseRequest "POST https://getpocket.com/v3/oauth/authorize"
-  let
-    request =
-      setRequestBodyJSON ar
-        $ setRequestHeaders [ ("Content-Type", "application/json")
-        , ("X-Accept", "application/json")
-        ]
-        $ request'
-  response <- httpLBS request
-  print response
-  case Aeson.eitherDecode (getResponseBody response) of
-    Right authResponse -> pure authResponse
-    Left e -> fail e
+authorizeReq :: (MonadIO m, MonadThrow m) => AuthorizeRequest -> m AuthorizeResponse
+authorizeReq =
+  common "POST https://getpocket.com/v3/oauth/authorize"
 
 
-add :: AddRequest -> IO AddResponse
-add addReq = do
-  request' <- parseRequest "POST https://getpocket.com/v3/add"
+add :: (MonadIO m, MonadThrow m) => AddRequest -> m AddResponse
+add =
+  common "POST https://getpocket.com/v3/add"
+
+get :: (MonadIO m, MonadThrow m) => GetRequest -> m GetResponse
+get =
+  common "POST https://getpocket.com/v3/get"
+
+send :: (MonadIO m, MonadThrow m) => SendRequest -> m SendResponse
+send =
+  common "POST https://getpocket.com/v3/send"
+
+common :: (ToJSON a, FromJSON b, MonadIO m, MonadThrow m) => String -> a -> m b
+common req r = do
+  request' <- parseRequest req
   let
     request =
-      setRequestBodyJSON addReq
+      setRequestBodyJSON r
         $ setRequestHeaders [ ("Content-Type", "application/json")
         , ("X-Accept", "application/json")
         ]
@@ -88,13 +88,3 @@ add addReq = do
     Nothing -> do
       let headers = getResponseHeader "X-Error" response
       undefined
-
-send :: MonadIO m => SendRequest -> m SendResponse
-send =
-  -- "POST https://getpocket.com/v3/send"
-  undefined
-
-get :: MonadIO m => GetRequest -> m GetResponse
-get =
-  -- "POST https://getpocket.com/v3/GET"
-  undefined

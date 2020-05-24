@@ -1,7 +1,14 @@
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
 
 module Web.Pocket.Auth
+  ( AuthRequest(..)
+  , makeAuthRequest
+  , AuthResponse(..)
+  , AuthorizeRequest(..)
+  , makeAuthorizeRequest
+  , AuthorizeResponse(..)
+  )
   where
 
 -- aeson
@@ -20,11 +27,11 @@ data AuthRequest =
 
 
 instance ToJSON AuthRequest where
-  toJSON AuthRequest {..} =
+  toJSON authRequest =
     object
-      [ "consumer_key" .= authReqConsumerKey
-      , "redirect_uri" .= authReqRedirectUri
-      , "state" .= authReqState
+      [ "consumer_key" .= authReqConsumerKey authRequest
+      , "redirect_uri" .= authReqRedirectUri authRequest
+      , "state" .= authReqState authRequest
       ]
 
 makeAuthRequest
@@ -32,7 +39,7 @@ makeAuthRequest
   -> Text
   -> AuthRequest
 makeAuthRequest authReqConsumerKey authReqRedirectUri =
-  AuthRequest { authReqState = Nothing, .. }
+  AuthRequest { authReqConsumerKey, authReqRedirectUri, authReqState = Nothing }
 
 data AuthResponse =
   AuthResponse
@@ -47,7 +54,7 @@ instance FromJSON AuthResponse where
       \o -> do
         authRespCode <- o .: "code"
         authRespState <- o .: "state"
-        return AuthResponse {..}
+        pure AuthResponse {authRespCode, authRespState}
 
 data AuthorizeRequest =
   AuthorizeRequest
@@ -56,10 +63,10 @@ data AuthorizeRequest =
     }
 
 instance ToJSON AuthorizeRequest where
-  toJSON AuthorizeRequest {..} =
+  toJSON authorizeRequest =
     object
-      [ "consumer_key" .= authorizeReqConsumerKey
-      , "code" .= authorizeReqCode
+      [ "consumer_key" .= authorizeReqConsumerKey authorizeRequest
+      , "code" .= authorizeReqCode authorizeRequest
       ]
 
 makeAuthorizeRequest
@@ -67,7 +74,7 @@ makeAuthorizeRequest
   -> Text
   -> AuthorizeRequest
 makeAuthorizeRequest authorizeReqConsumerKey authorizeReqCode =
-  AuthorizeRequest {..}
+  AuthorizeRequest {authorizeReqCode, authorizeReqConsumerKey}
 
 data AuthorizeResponse =
   AuthorizeResponse
@@ -83,4 +90,8 @@ instance FromJSON AuthorizeResponse where
         authorizeRespAccessToken <- o .: "access_token"
         authorizeRespUsername <- o .: "username"
         authorizeRespState <- o .:? "state"
-        return AuthorizeResponse {..}
+        pure AuthorizeResponse
+          { authorizeRespAccessToken
+          , authorizeRespState
+          , authorizeRespUsername
+          }

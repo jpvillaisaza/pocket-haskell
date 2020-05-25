@@ -52,6 +52,7 @@ data AddRsp =
     { addRspItem :: Object
     , addRspStatus :: Integer
     }
+  deriving (Show)
 
 instance FromJSON AddRsp where
   parseJSON =

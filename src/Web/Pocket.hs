@@ -7,6 +7,11 @@ module Web.Pocket
   , add
   , get
   , send
+  , module Web.Pocket.Add
+  , module Web.Pocket.Auth
+  , module Web.Pocket.Error
+  , module Web.Pocket.Get
+  , module Web.Pocket.Send
   )
   where
 

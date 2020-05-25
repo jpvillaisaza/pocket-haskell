@@ -1,22 +1,13 @@
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
-
-----------------------------------------------------------------------
--- |
--- Module: Web.Pocket.Auth
--- Description:
---
---
---
-----------------------------------------------------------------------
 
 module Web.Pocket.Auth
-  ( AuthRequest (..)
+  ( AuthRequest(..)
   , makeAuthRequest
-  , AuthResponse (..)
-  , AuthorizeRequest (..)
+  , AuthResponse(..)
+  , AuthorizeRequest(..)
   , makeAuthorizeRequest
-  , AuthorizeResponse (..)
+  , AuthorizeResponse(..)
   )
   where
 
@@ -27,10 +18,6 @@ import Data.Aeson
 import Data.Text (Text)
 
 
--- |
---
---
-
 data AuthRequest =
   AuthRequest
     { authReqConsumerKey :: Text
@@ -38,35 +25,20 @@ data AuthRequest =
     , authReqState :: Maybe Text
     }
 
-
--- |
---
---
-
 instance ToJSON AuthRequest where
-  toJSON AuthRequest {..} =
+  toJSON authRequest =
     object
-      [ "consumer_key" .= authReqConsumerKey
-      , "redirect_uri" .= authReqRedirectUri
-      , "state" .= authReqState
+      [ "consumer_key" .= authReqConsumerKey authRequest
+      , "redirect_uri" .= authReqRedirectUri authRequest
+      , "state" .= authReqState authRequest
       ]
-
-
--- |
---
---
 
 makeAuthRequest
   :: Text
   -> Text
   -> AuthRequest
 makeAuthRequest authReqConsumerKey authReqRedirectUri =
-  AuthRequest { authReqState = Nothing, .. }
-
-
--- |
---
---
+  AuthRequest { authReqConsumerKey, authReqRedirectUri, authReqState = Nothing }
 
 data AuthResponse =
   AuthResponse
@@ -75,23 +47,13 @@ data AuthResponse =
     }
   deriving (Show)
 
-
--- |
---
---
-
 instance FromJSON AuthResponse where
   parseJSON =
     withObject "" $
       \o -> do
         authRespCode <- o .: "code"
         authRespState <- o .: "state"
-        return AuthResponse {..}
-
-
--- |
---
---
+        pure AuthResponse {authRespCode, authRespState}
 
 data AuthorizeRequest =
   AuthorizeRequest
@@ -99,34 +61,19 @@ data AuthorizeRequest =
     , authorizeReqCode :: Text
     }
 
-
--- |
---
---
-
 instance ToJSON AuthorizeRequest where
-  toJSON AuthorizeRequest {..} =
+  toJSON authorizeRequest =
     object
-      [ "consumer_key" .= authorizeReqConsumerKey
-      , "code" .= authorizeReqCode
+      [ "consumer_key" .= authorizeReqConsumerKey authorizeRequest
+      , "code" .= authorizeReqCode authorizeRequest
       ]
-
-
--- |
---
---
 
 makeAuthorizeRequest
   :: Text
   -> Text
   -> AuthorizeRequest
 makeAuthorizeRequest authorizeReqConsumerKey authorizeReqCode =
-  AuthorizeRequest {..}
-
-
--- |
---
---
+  AuthorizeRequest {authorizeReqCode, authorizeReqConsumerKey}
 
 data AuthorizeResponse =
   AuthorizeResponse
@@ -135,16 +82,15 @@ data AuthorizeResponse =
     , authorizeRespState :: Maybe Text
     }
 
-
--- |
---
---
-
 instance FromJSON AuthorizeResponse where
   parseJSON =
     withObject "" $
       \o -> do
         authorizeRespAccessToken <- o .: "access_token"
         authorizeRespUsername <- o .: "username"
-        authorizeRespState <- o .: "state"
-        return AuthorizeResponse {..}
+        authorizeRespState <- o .:? "state"
+        pure AuthorizeResponse
+          { authorizeRespAccessToken
+          , authorizeRespState
+          , authorizeRespUsername
+          }

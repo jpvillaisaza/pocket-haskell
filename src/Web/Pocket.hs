@@ -1,183 +1,79 @@
-{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeOperators #-}
-
-----------------------------------------------------------------------
--- |
--- Module: Web.Pocket
--- Description:
---
---
---
-----------------------------------------------------------------------
 
 module Web.Pocket
-  ( AuthRequest (..)
-  , makeAuthRequest
-  , AuthorizeRequest (..)
-  , makeAuthorizeRequest
-  , authRequest
-  , authorize
+  ( authReq
+  , authGet
+  , authorizeReq
   , add
-  , AddRequest (..)
-  , makeAddRequest
-  , AddResponse (..)
-  , send
-  , Action (..)
-  , SendRequest (..)
-  , SendResponse (..)
   , get
-  , GetRequest (..)
-  , makeGetRequest
-  , GetResponse (..)
-  , run
-  , makeManager
+  , send
   )
   where
 
 -- base
-import Data.Proxy (Proxy (..))
+import Control.Monad.IO.Class (MonadIO)
 
--- http-client
-import Network.HTTP.Client hiding (Proxy)
-
--- http-client-tls
-import Network.HTTP.Client.TLS
+-- exceptions
+import Control.Monad.Catch (MonadThrow)
 
 -- pocket
 import Web.Pocket.Add
 import Web.Pocket.Auth
+import Web.Pocket.Error
 import Web.Pocket.Get
+import Web.Pocket.Request
 import Web.Pocket.Send
 
--- servant
-import Servant.API
-
--- servant-client
-import Servant.Client hiding (Client)
-
--- transformers
-import Control.Monad.IO.Class
+-- text
+import qualified Data.Text as Text
 
 
--- |
---
---
+authReq
+  :: (MonadIO m, MonadThrow m)
+  => AuthRequest
+  -> m (Either Error AuthResponse)
+authReq =
+  request "POST https://getpocket.com/v3/oauth/request"
 
-type API =
-  "v3"
-    :>
-      ( "oauth"
-          :>
-            ( "request"
-                :> ReqBody '[JSON] AuthRequest
-                :> Post '[JSON] AuthResponse
-            :<|>
-              "authorize"
-                :> ReqBody '[JSON] AuthorizeRequest
-                :> Post '[JSON] AuthorizeResponse
-            )
-      :<|>
-        "add"
-          :> ReqBody '[JSON] AddRequest
-          :> Post '[JSON] AddResponse
-      :<|>
-        "send"
-          :> ReqBody '[JSON] SendRequest
-          :> Post '[JSON] SendResponse
-      :<|>
-        "get"
-          :> ReqBody '[JSON] GetRequest
-          :> Post '[JSON] GetResponse
-      )
+authGet
+  :: (MonadIO m, MonadThrow m)
+  => AuthRequest
+  -> m (Either Error String)
+authGet ar = do
+  eAuthRsp <- authReq ar
+  case eAuthRsp of
+    Left e -> pure (Left e)
+    Right authRsp ->
+      pure $ Right $
+        "https://getpocket.com/auth/authorize?request_token="
+          <> Text.unpack (authRespCode authRsp)
+          <> "&redirect_uri="
+          <> Text.unpack (authReqRedirectUri ar)
 
-
--- |
---
---
-
-authRequest
-  :: AuthRequest
-  -> ClientM AuthResponse
-
-
--- |
---
---
-
-authorize
-  :: AuthorizeRequest
-  -> ClientM AuthorizeResponse
-
-
--- |
---
---
+authorizeReq
+  :: (MonadIO m, MonadThrow m)
+  => AuthorizeRequest
+  -> m (Either Error AuthorizeResponse)
+authorizeReq =
+  request "POST https://getpocket.com/v3/oauth/authorize"
 
 add
-  :: AddRequest
-  -> ClientM AddResponse
-
-
--- |
---
---
-
-send
-  :: SendRequest
-  -> ClientM SendResponse
-
-
--- |
---
---
+  :: (MonadIO m, MonadThrow m)
+  => AddRequest
+  -> m (Either Error AddResponse)
+add =
+  request "POST https://getpocket.com/v3/add"
 
 get
-  :: GetRequest
-  -> ClientM GetResponse
+  :: (MonadIO m, MonadThrow m)
+  => GetRequest
+  -> m (Either Error GetResponse)
+get =
+  request "POST https://getpocket.com/v3/get"
 
-(authRequest :<|> authorize) :<|> add :<|> send :<|> get =
-  client (Proxy :: Proxy API)
-
-
--- |
---
---
-
-run
-  :: MonadIO m
-  => Manager
-  -> ClientM a
-  -> m (Either ServantError a)
-run manager =
-  let
-    baseUrl =
-      BaseUrl
-        Https
-        "getpocket.com"
-        443
-        ""
-  in
-    liftIO . flip runClientM (ClientEnv manager baseUrl)
-
-
--- |
---
---
-
-makeManager :: IO Manager
-makeManager =
-  let
-    managerSettings =
-      tlsManagerSettings
-        { managerModifyRequest = \r ->
-            return
-              r
-                { requestHeaders =
-                    [ ("Content-Type", "application/json")
-                    , ("X-Accept", "application/json")
-                    ]
-                }
-        }
-  in
-    newManager managerSettings
+send
+  :: (MonadIO m, MonadThrow m)
+  => SendRequest
+  -> m (Either Error SendResponse)
+send =
+  request "POST https://getpocket.com/v3/send"

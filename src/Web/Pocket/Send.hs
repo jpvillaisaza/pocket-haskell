@@ -1,15 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
-----------------------------------------------------------------------
--- |
--- Module: Web.Pocket.Send
--- Description:
---
---
---
-----------------------------------------------------------------------
-
 module Web.Pocket.Send
   ( SendRequest (..)
   , Action (..)
@@ -24,21 +15,12 @@ import Data.Aeson
 import Data.Text (Text)
 
 
--- |
---
---
-
 data SendRequest =
   SendRequest
     { sendReqConsumerKey :: Text
     , sendReqAccessToken :: Text
     , sendReqActions :: [Action]
     }
-
-
--- |
---
---
 
 instance ToJSON SendRequest where
   toJSON SendRequest {..} =
@@ -47,11 +29,6 @@ instance ToJSON SendRequest where
       , "access_token" .= sendReqAccessToken
       , "actions" .= sendReqActions
       ]
-
-
--- |
---
---
 
 data Action
   = Add
@@ -106,11 +83,6 @@ data Action
       { itemId :: Text
       , time :: Maybe Text
       }
-
-
--- |
---
---
 
 instance ToJSON Action where
   toJSON Add {..} =
@@ -187,22 +159,12 @@ instance ToJSON Action where
       , "time" .= time
       ]
 
-
--- |
---
---
-
 data SendResponse =
   SendResponse
     { sendRespActionResults :: [Bool]
     , sendRespStatus :: Integer
     }
   deriving (Show)
-
-
--- |
---
---
 
 instance FromJSON SendResponse where
   parseJSON =

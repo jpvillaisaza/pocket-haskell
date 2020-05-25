@@ -1,10 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
 
 module Web.Pocket.Get
-  ( GetRequest (..)
-  , makeGetRequest
-  , GetResponse (..)
+  ( GetReq(..)
+  , makeGetReq
+  , GetRsp(..)
   )
   where
 
@@ -15,8 +14,8 @@ import Data.Aeson
 import Data.Text (Text)
 
 
-data GetRequest =
-  GetRequest
+data GetReq =
+  GetReq
     { getReqConsumerKey :: Text
     , getReqAccessToken :: Text
     , getReqState ::  Maybe Text
@@ -32,31 +31,33 @@ data GetRequest =
     , getReqOffset :: Maybe Integer
     }
 
-instance ToJSON GetRequest where
-  toJSON GetRequest {..} =
+instance ToJSON GetReq where
+  toJSON getReq =
     object
-      [ "consumer_key" .= getReqConsumerKey
-      , "access_token" .= getReqAccessToken
-      , "state" .= getReqState
-      , "favorite" .= getReqFavorite
-      , "tag" .= getReqTag
-      , "contentType" .= getReqContentType
-      , "sort" .= getReqSort
-      , "detailType" .= getReqDetailType
-      , "search" .= getReqSearch
-      , "domain" .= getReqDomain
-      , "since" .= getReqSince
-      , "count" .= getReqCount
-      , "offset" .= getReqOffset
+      [ "consumer_key" .= getReqConsumerKey getReq
+      , "access_token" .= getReqAccessToken getReq
+      , "state" .= getReqState getReq
+      , "favorite" .= getReqFavorite getReq
+      , "tag" .= getReqTag getReq
+      , "contentType" .= getReqContentType getReq
+      , "sort" .= getReqSort getReq
+      , "detailType" .= getReqDetailType getReq
+      , "search" .= getReqSearch getReq
+      , "domain" .= getReqDomain getReq
+      , "since" .= getReqSince getReq
+      , "count" .= getReqCount getReq
+      , "offset" .= getReqOffset getReq
       ]
 
-makeGetRequest
+makeGetReq
   :: Text
   -> Text
-  -> GetRequest
-makeGetRequest getReqConsumerKey getReqAccessToken =
-  GetRequest
-    { getReqState = Nothing
+  -> GetReq
+makeGetReq consumerKey accessToken =
+  GetReq
+    { getReqConsumerKey = consumerKey
+    , getReqAccessToken = accessToken
+    , getReqState = Nothing
     , getReqFavorite = Nothing
     , getReqTag = Nothing
     , getReqContentType = Nothing
@@ -67,20 +68,19 @@ makeGetRequest getReqConsumerKey getReqAccessToken =
     , getReqSince = Nothing
     , getReqCount = Nothing
     , getReqOffset = Nothing
-    , ..
     }
 
-data GetResponse =
-  GetResponse
+data GetRsp =
+  GetRsp
     { getRespList :: Object
     , getRespStatus :: Integer
     }
   deriving (Show)
 
-instance FromJSON GetResponse where
+instance FromJSON GetRsp where
   parseJSON =
     withObject "" $
-      \o -> do
-        getRespList <- o .: "list"
-        getRespStatus <- o .: "status"
-        return GetResponse {..}
+      \o ->
+        GetRsp
+          <$> o .: "list"
+          <*> o .: "status"

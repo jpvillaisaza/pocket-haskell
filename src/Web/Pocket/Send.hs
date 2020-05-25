@@ -2,9 +2,9 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module Web.Pocket.Send
-  ( SendRequest (..)
-  , Action (..)
-  , SendResponse (..)
+  ( SendReq(..)
+  , Action(..)
+  , SendRsp(..)
   )
   where
 
@@ -15,19 +15,19 @@ import Data.Aeson
 import Data.Text (Text)
 
 
-data SendRequest =
-  SendRequest
+data SendReq =
+  SendReq
     { sendReqConsumerKey :: Text
     , sendReqAccessToken :: Text
     , sendReqActions :: [Action]
     }
 
-instance ToJSON SendRequest where
-  toJSON SendRequest {..} =
+instance ToJSON SendReq where
+  toJSON sendReq =
     object
-      [ "consumer_key" .= sendReqConsumerKey
-      , "access_token" .= sendReqAccessToken
-      , "actions" .= sendReqActions
+      [ "consumer_key" .= sendReqConsumerKey sendReq
+      , "access_token" .= sendReqAccessToken sendReq
+      , "actions" .= sendReqActions sendReq
       ]
 
 data Action
@@ -159,17 +159,17 @@ instance ToJSON Action where
       , "time" .= time
       ]
 
-data SendResponse =
-  SendResponse
-    { sendRespActionResults :: [Bool]
-    , sendRespStatus :: Integer
+data SendRsp =
+  SendRsp
+    { sendRspActionResults :: [Bool]
+    , sendRspStatus :: Integer
     }
   deriving (Show)
 
-instance FromJSON SendResponse where
+instance FromJSON SendRsp where
   parseJSON =
     withObject "" $
-      \o -> do
-        sendRespActionResults <- o .: "action_results"
-        sendRespStatus <- o .: "status"
-        return SendResponse {..}
+      \o ->
+        SendRsp
+          <$> o .: "action_results"
+          <*> o .: "status"

@@ -1,10 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
 
 module Web.Pocket.Add
-  ( AddRequest (..)
-  , makeAddRequest
-  , AddResponse (..)
+  ( AddReq(..)
+  , makeAddReq
+  , AddRsp(..)
   )
   where
 
@@ -15,8 +14,8 @@ import Data.Aeson
 import Data.Text (Text)
 
 
-data AddRequest =
-  AddRequest
+data AddReq =
+  AddReq
     { addReqConsumerKey :: Text
     , addReqAccessToken :: Text
     , addReqUrl :: Text
@@ -25,37 +24,39 @@ data AddRequest =
     , addReqTweetId :: Maybe Text
     }
 
-makeAddRequest
+makeAddReq
   :: Text
   -> Text
   -> Text
-  -> AddRequest
-makeAddRequest addReqConsumerKey addReqAccessToken addReqUrl =
-  AddRequest
-    { addReqTitle = Nothing
+  -> AddReq
+makeAddReq consumerKey accessToken url =
+  AddReq
+    { addReqConsumerKey = consumerKey
+    , addReqAccessToken = accessToken
+    , addReqUrl = url
+    , addReqTitle = Nothing
     , addReqTags = Nothing
     , addReqTweetId = Nothing
-    , ..
     }
 
-instance ToJSON AddRequest where
-  toJSON AddRequest {..} =
+instance ToJSON AddReq where
+  toJSON addReq =
     object
-      [ "url" .= addReqUrl
-      , "consumer_key" .= addReqConsumerKey
-      , "access_token" .= addReqAccessToken
+      [ "url" .= addReqUrl addReq
+      , "consumer_key" .= addReqConsumerKey addReq
+      , "access_token" .= addReqAccessToken addReq
       ]
 
-data AddResponse =
-  AddResponse
-    { addRespItem :: Object
-    , addRespStatus :: Integer
+data AddRsp =
+  AddRsp
+    { addRspItem :: Object
+    , addRspStatus :: Integer
     }
 
-instance FromJSON AddResponse where
+instance FromJSON AddRsp where
   parseJSON =
     withObject "" $
-      \o -> do
-        addRespItem <- o .: "item"
-        addRespStatus <- o .: "status"
-        return AddResponse {..}
+      \o ->
+        AddRsp
+          <$> o .: "item"
+          <*> o .: "status"

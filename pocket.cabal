@@ -1,17 +1,11 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.33.0.
---
--- see: https://github.com/sol/hpack
---
--- hash: 7b8c566c33d55122017a1ae15bb59b973182110c62d2bc42cb532a1b2841c4a6
-
 name:           pocket
 version:        0.2.0
 synopsis:       Bindings for the Pocket API
 description:    Bindings for the Pocket API.
 category:       Web
-homepage:       https://github.com/jpvillaisaza/pocket-haskell#readme
+homepage:       https://github.com/jpvillaisaza/pocket-haskell
 bug-reports:    https://github.com/jpvillaisaza/pocket-haskell/issues
 author:         Juan Pedro Villa Isaza
 maintainer:     Juan Pedro Villa Isaza
@@ -38,10 +32,10 @@ library
   ghc-options: -Wall
   build-depends:
       aeson
-    , base >=4.13 && <4.14
+    , base >= 4.13 && < 4.14
     , bytestring
     , exceptions
-    , http-conduit >=2.3
+    , http-conduit >= 2.3
     , http-types
     , text
   default-language: Haskell2010

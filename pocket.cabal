@@ -1,7 +1,7 @@
 cabal-version: 1.12
 
 name:           pocket
-version:        0.2.0
+version:        0.3.0
 synopsis:       Bindings for the Pocket API
 description:    Bindings for the Pocket API.
 category:       Web

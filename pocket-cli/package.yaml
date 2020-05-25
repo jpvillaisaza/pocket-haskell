@@ -1,0 +1,16 @@
+name: pocket-cli
+version: 0.1.0
+
+executable:
+  source-dirs:
+    app
+  main:
+    Main.hs
+  dependencies:
+    - base
+    - pocket
+  ghc-options:
+    - -Wall
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N

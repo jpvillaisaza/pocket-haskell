@@ -1,1 +1,4 @@
+packages:
+  - pocket
+  - pocket-cli
 resolver: lts-15.13

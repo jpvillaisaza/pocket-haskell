@@ -1,0 +1,23 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 783bf6755e274389b71bb0afe48d998fb9f46aa16643ae7872968b9740e387f9
+
+name:           pocket-cli
+version:        0.1.0
+build-type:     Simple
+
+executable pocket-cli
+  main-is: Main.hs
+  other-modules:
+      Paths_pocket_cli
+  hs-source-dirs:
+      app
+  ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base
+    , pocket
+  default-language: Haskell2010

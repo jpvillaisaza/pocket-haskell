@@ -1,15 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
-----------------------------------------------------------------------
--- |
--- Module: Web.Pocket.Add
--- Description:
---
---
---
-----------------------------------------------------------------------
-
 module Web.Pocket.Add
   ( AddRequest (..)
   , makeAddRequest
@@ -24,10 +15,6 @@ import Data.Aeson
 import Data.Text (Text)
 
 
--- |
---
---
-
 data AddRequest =
   AddRequest
     { addReqConsumerKey :: Text
@@ -37,11 +24,6 @@ data AddRequest =
     , addReqTags :: Maybe Text
     , addReqTweetId :: Maybe Text
     }
-
-
--- |
---
---
 
 makeAddRequest
   :: Text
@@ -56,11 +38,6 @@ makeAddRequest addReqConsumerKey addReqAccessToken addReqUrl =
     , ..
     }
 
-
--- |
---
---
-
 instance ToJSON AddRequest where
   toJSON AddRequest {..} =
     object
@@ -69,21 +46,11 @@ instance ToJSON AddRequest where
       , "access_token" .= addReqAccessToken
       ]
 
-
--- |
---
---
-
 data AddResponse =
   AddResponse
     { addRespItem :: Object
     , addRespStatus :: Integer
     }
-
-
--- |
---
---
 
 instance FromJSON AddResponse where
   parseJSON =

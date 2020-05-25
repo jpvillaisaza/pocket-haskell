@@ -4,17 +4,19 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 8f94031d2b6a3281c6b26735fa87e455465527952d203e4d7bfa1488dd766f77
+-- hash: 7b8c566c33d55122017a1ae15bb59b973182110c62d2bc42cb532a1b2841c4a6
 
 name:           pocket
 version:        0.2.0
 synopsis:       Bindings for the Pocket API
-description:    Haskell bindings for the Pocket API.
+description:    Bindings for the Pocket API.
 category:       Web
 homepage:       https://github.com/jpvillaisaza/pocket-haskell#readme
 bug-reports:    https://github.com/jpvillaisaza/pocket-haskell/issues
 author:         Juan Pedro Villa Isaza
 maintainer:     Juan Pedro Villa Isaza
+license:        MIT
+license-file:   LICENSE.md
 build-type:     Simple
 
 source-repository head
@@ -26,17 +28,20 @@ library
       Web.Pocket
       Web.Pocket.Add
       Web.Pocket.Auth
+      Web.Pocket.Error
       Web.Pocket.Get
       Web.Pocket.Send
   other-modules:
-      Web.Pocket.Internal
+      Web.Pocket.Request
   hs-source-dirs:
       src
   ghc-options: -Wall
   build-depends:
       aeson
-    , base
+    , base >=4.13 && <4.14
+    , bytestring
     , exceptions
-    , http-conduit
+    , http-conduit >=2.3
+    , http-types
     , text
   default-language: Haskell2010

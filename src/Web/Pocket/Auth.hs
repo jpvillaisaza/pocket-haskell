@@ -25,7 +25,6 @@ data AuthRequest =
     , authReqState :: Maybe Text
     }
 
-
 instance ToJSON AuthRequest where
   toJSON authRequest =
     object

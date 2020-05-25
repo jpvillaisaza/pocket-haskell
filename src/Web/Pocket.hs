@@ -1,14 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-----------------------------------------------------------------------
--- |
--- Module: Web.Pocket
--- Description:
---
---
---
-----------------------------------------------------------------------
-
 module Web.Pocket
   ( authReq
   , authGet
@@ -28,40 +19,40 @@ import Control.Monad.Catch (MonadThrow)
 -- pocket
 import Web.Pocket.Add
 import Web.Pocket.Auth
+import Web.Pocket.Error
 import Web.Pocket.Get
-import Web.Pocket.Internal
+import Web.Pocket.Request
 import Web.Pocket.Send
 
 -- text
 import qualified Data.Text as Text
 
 
-authReq :: (MonadIO m, MonadThrow m) => AuthRequest -> m AuthResponse
+authReq :: (MonadIO m, MonadThrow m) => AuthRequest -> m (Either Error AuthResponse)
 authReq =
-  common "POST https://getpocket.com/v3/oauth/request"
+  request "POST https://getpocket.com/v3/oauth/request"
 
 authGet :: AuthRequest -> IO String
 authGet ar = do
-  authRsp <- authReq ar
+  Right authRsp <- authReq ar
   pure $
     "https://getpocket.com/auth/authorize?request_token="
       <> Text.unpack (authRespCode authRsp)
       <> "&redirect_uri="
       <> Text.unpack (authReqRedirectUri ar)
 
-authorizeReq :: (MonadIO m, MonadThrow m) => AuthorizeRequest -> m AuthorizeResponse
+authorizeReq :: (MonadIO m, MonadThrow m) => AuthorizeRequest -> m (Either Error AuthorizeResponse)
 authorizeReq =
-  common "POST https://getpocket.com/v3/oauth/authorize"
+  request "POST https://getpocket.com/v3/oauth/authorize"
 
-
-add :: (MonadIO m, MonadThrow m) => AddRequest -> m AddResponse
+add :: (MonadIO m, MonadThrow m) => AddRequest -> m (Either Error AddResponse)
 add =
-  common "POST https://getpocket.com/v3/add"
+  request "POST https://getpocket.com/v3/add"
 
-get :: (MonadIO m, MonadThrow m) => GetRequest -> m GetResponse
+get :: (MonadIO m, MonadThrow m) => GetRequest -> m (Either Error GetResponse)
 get =
-  common "POST https://getpocket.com/v3/get"
+  request "POST https://getpocket.com/v3/get"
 
-send :: (MonadIO m, MonadThrow m) => SendRequest -> m SendResponse
+send :: (MonadIO m, MonadThrow m) => SendRequest -> m (Either Error SendResponse)
 send =
-  common "POST https://getpocket.com/v3/send"
+  request "POST https://getpocket.com/v3/send"

@@ -1,15 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
-----------------------------------------------------------------------
--- |
--- Module: Web.Pocket.Get
--- Description:
---
---
---
-----------------------------------------------------------------------
-
 module Web.Pocket.Get
   ( GetRequest (..)
   , makeGetRequest
@@ -23,10 +14,6 @@ import Data.Aeson
 -- text
 import Data.Text (Text)
 
-
--- |
---
---
 
 data GetRequest =
   GetRequest
@@ -45,11 +32,6 @@ data GetRequest =
     , getReqOffset :: Maybe Integer
     }
 
-
--- |
---
---
-
 instance ToJSON GetRequest where
   toJSON GetRequest {..} =
     object
@@ -67,11 +49,6 @@ instance ToJSON GetRequest where
       , "count" .= getReqCount
       , "offset" .= getReqOffset
       ]
-
-
--- |
---
---
 
 makeGetRequest
   :: Text
@@ -93,22 +70,12 @@ makeGetRequest getReqConsumerKey getReqAccessToken =
     , ..
     }
 
-
--- |
---
---
-
 data GetResponse =
   GetResponse
     { getRespList :: Object
     , getRespStatus :: Integer
     }
   deriving (Show)
-
-
--- |
---
---
 
 instance FromJSON GetResponse where
   parseJSON =

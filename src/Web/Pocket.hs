@@ -1,9 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Web.Pocket
-  ( authReq
-  , authGet
-  , authorizeReq
+  ( authRequest
+  , authAuthorize
+  , makeRedirect
   , add
   , get
   , send
@@ -25,55 +25,47 @@ import Web.Pocket.Request
 import Web.Pocket.Send
 
 -- text
-import qualified Data.Text as Text
+import Data.Text (Text)
 
 
-authReq
+authRequest
   :: (MonadIO m, MonadThrow m)
-  => AuthRequest
-  -> m (Either Error AuthResponse)
-authReq =
+  => AuthRequestReq
+  -> m (Either Error AuthRequestRsp)
+authRequest =
   request "POST https://getpocket.com/v3/oauth/request"
 
-authGet
+authAuthorize
   :: (MonadIO m, MonadThrow m)
-  => AuthRequest
-  -> m (Either Error String)
-authGet ar = do
-  eAuthRsp <- authReq ar
-  case eAuthRsp of
-    Left e -> pure (Left e)
-    Right authRsp ->
-      pure $ Right $
-        "https://getpocket.com/auth/authorize?request_token="
-          <> Text.unpack (authRespCode authRsp)
-          <> "&redirect_uri="
-          <> Text.unpack (authReqRedirectUri ar)
-
-authorizeReq
-  :: (MonadIO m, MonadThrow m)
-  => AuthorizeRequest
-  -> m (Either Error AuthorizeResponse)
-authorizeReq =
+  => AuthAuthorizeReq
+  -> m (Either Error AuthAuthorizeRsp)
+authAuthorize =
   request "POST https://getpocket.com/v3/oauth/authorize"
+
+makeRedirect :: AuthRequestReq -> AuthRequestRsp -> Text
+makeRedirect req rsp =
+  "https://getpocket.com/auth/authorize?request_token="
+    <> authRequestRspCode rsp
+    <> "&redirect_uri="
+    <> authRequestReqRedirectUri req
 
 add
   :: (MonadIO m, MonadThrow m)
-  => AddRequest
-  -> m (Either Error AddResponse)
+  => AddReq
+  -> m (Either Error AddRsp)
 add =
   request "POST https://getpocket.com/v3/add"
 
 get
   :: (MonadIO m, MonadThrow m)
-  => GetRequest
-  -> m (Either Error GetResponse)
+  => GetReq
+  -> m (Either Error GetRsp)
 get =
   request "POST https://getpocket.com/v3/get"
 
 send
   :: (MonadIO m, MonadThrow m)
-  => SendRequest
-  -> m (Either Error SendResponse)
+  => SendReq
+  -> m (Either Error SendRsp)
 send =
   request "POST https://getpocket.com/v3/send"

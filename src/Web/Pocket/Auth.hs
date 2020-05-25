@@ -1,96 +1,75 @@
-{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Web.Pocket.Auth
-  ( AuthRequest(..)
-  , makeAuthRequest
-  , AuthResponse(..)
-  , AuthorizeRequest(..)
-  , makeAuthorizeRequest
-  , AuthorizeResponse(..)
+  ( AuthRequestReq(..)
+  , AuthRequestRsp(..)
+  , AuthAuthorizeReq(..)
+  , AuthAuthorizeRsp(..)
   )
   where
 
 -- aeson
-import Data.Aeson
+import Data.Aeson ((.:), (.:?), (.=), FromJSON(..), ToJSON(..))
+import qualified Data.Aeson as Aeson
 
 -- text
 import Data.Text (Text)
 
 
-data AuthRequest =
-  AuthRequest
-    { authReqConsumerKey :: Text
-    , authReqRedirectUri :: Text
-    , authReqState :: Maybe Text
+data AuthRequestReq =
+  AuthRequestReq
+    { authRequestReqConsumerKey :: Text
+    , authRequestReqRedirectUri :: Text
+    , authRequestReqState :: Maybe Text
     }
 
-instance ToJSON AuthRequest where
-  toJSON authRequest =
-    object
-      [ "consumer_key" .= authReqConsumerKey authRequest
-      , "redirect_uri" .= authReqRedirectUri authRequest
-      , "state" .= authReqState authRequest
+instance ToJSON AuthRequestReq where
+  toJSON authRequestReq =
+    Aeson.object
+      [ "consumer_key" .= authRequestReqConsumerKey authRequestReq
+      , "redirect_uri" .= authRequestReqRedirectUri authRequestReq
+      , "state" .= authRequestReqState authRequestReq
       ]
 
-makeAuthRequest
-  :: Text
-  -> Text
-  -> AuthRequest
-makeAuthRequest authReqConsumerKey authReqRedirectUri =
-  AuthRequest { authReqConsumerKey, authReqRedirectUri, authReqState = Nothing }
-
-data AuthResponse =
-  AuthResponse
-    { authRespCode :: Text
-    , authRespState :: Maybe Text
+data AuthRequestRsp =
+  AuthRequestRsp
+    { authRequestRspCode :: Text
+    , authRequestRspState :: Maybe Text
     }
-  deriving (Show)
 
-instance FromJSON AuthResponse where
+instance FromJSON AuthRequestRsp where
   parseJSON =
-    withObject "" $
-      \o -> do
-        authRespCode <- o .: "code"
-        authRespState <- o .: "state"
-        pure AuthResponse {authRespCode, authRespState}
+    Aeson.withObject "" $
+      \o ->
+        AuthRequestRsp
+          <$> o .: "code"
+          <*> o .:? "state"
 
-data AuthorizeRequest =
-  AuthorizeRequest
-    { authorizeReqConsumerKey :: Text
-    , authorizeReqCode :: Text
+data AuthAuthorizeReq =
+  AuthAuthorizeReq
+    { authAuthorizeReqConsumerKey :: Text
+    , authAuthorizeReqCode :: Text
     }
 
-instance ToJSON AuthorizeRequest where
-  toJSON authorizeRequest =
-    object
-      [ "consumer_key" .= authorizeReqConsumerKey authorizeRequest
-      , "code" .= authorizeReqCode authorizeRequest
+instance ToJSON AuthAuthorizeReq where
+  toJSON authAuthorizeReq =
+    Aeson.object
+      [ "consumer_key" .= authAuthorizeReqConsumerKey authAuthorizeReq
+      , "code" .= authAuthorizeReqCode authAuthorizeReq
       ]
 
-makeAuthorizeRequest
-  :: Text
-  -> Text
-  -> AuthorizeRequest
-makeAuthorizeRequest authorizeReqConsumerKey authorizeReqCode =
-  AuthorizeRequest {authorizeReqCode, authorizeReqConsumerKey}
-
-data AuthorizeResponse =
-  AuthorizeResponse
-    { authorizeRespAccessToken :: Text
-    , authorizeRespUsername :: Text
-    , authorizeRespState :: Maybe Text
+data AuthAuthorizeRsp =
+  AuthAuthorizeRsp
+    { authAuthorizeRspAccessToken :: Text
+    , authAuthorizeRspUsername :: Text
+    , authAuthorizeRspState :: Maybe Text
     }
 
-instance FromJSON AuthorizeResponse where
+instance FromJSON AuthAuthorizeRsp where
   parseJSON =
-    withObject "" $
-      \o -> do
-        authorizeRespAccessToken <- o .: "access_token"
-        authorizeRespUsername <- o .: "username"
-        authorizeRespState <- o .:? "state"
-        pure AuthorizeResponse
-          { authorizeRespAccessToken
-          , authorizeRespState
-          , authorizeRespUsername
-          }
+    Aeson.withObject "" $
+      \o ->
+        AuthAuthorizeRsp
+          <$> o .: "access_token"
+          <*> o .: "username"
+          <*> o .:? "state"
